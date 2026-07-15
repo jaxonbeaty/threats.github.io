@@ -15,7 +15,7 @@
             
             --resolved: #10b981;
             --mitigated: #f59e0b;
-            --active: #ef4444;
+            --active: #f43f5e;
         }
 
         body {
@@ -49,14 +49,14 @@
         .feed-indicator {
             width: 8px;
             height: 8px;
-            background-color: var(--accent);
+            background-color: var(--active);
             border-radius: 50%;
             display: inline-block;
-            box-shadow: 0 0 8px var(--accent);
+            box-shadow: 0 0 8px var(--active);
         }
 
         .badge-ms {
-            background-color: #f25022; /* Microsoft Red/Orange */
+            background-color: #0078d4; /* Microsoft Blue */
             color: #ffffff;
             padding: 2px 6px;
             border-radius: 4px;
@@ -90,7 +90,7 @@
         }
 
         .platform-badge {
-            background-color: rgba(0, 120, 212, 0.1);
+            background-color: rgba(59, 130, 246, 0.1);
             color: #60a5fa;
             padding: 2px 6px;
             border-radius: 4px;
@@ -100,18 +100,6 @@
 
         .status-active {
             color: var(--active);
-            font-size: 11px;
-            font-weight: bold;
-        }
-
-        .status-mitigated {
-            color: var(--mitigated);
-            font-size: 11px;
-            font-weight: bold;
-        }
-
-        .status-resolved {
-            color: var(--resolved);
             font-size: 11px;
             font-weight: bold;
         }
@@ -169,8 +157,8 @@
 <body>
 
     <div class="header">
-        <h2><span class="feed-indicator"></span> Microsoft Hot Patches & Issues</h2>
-        <span class="badge-ms">MSRC Feed</span>
+        <h2><span class="feed-indicator"></span> Microsoft Security Updates</h2>
+        <span class="badge-ms">MSRC RSS</span>
     </div>
 
     <div class="issue-container">
@@ -181,7 +169,7 @@
     </div>
 
     <div style="margin-top: 15px; text-align: center;" class="attribution">
-        Data provided by <a href="https://senserva.com" target="_blank">Senserva</a>
+        Source: Official Microsoft Security Response Center Feed
     </div>
 
 </body>
