@@ -252,7 +252,7 @@ async function updateMicrosoftIssues() {
         Source: Official Microsoft Security Response Center Feed
     </div>
     <div style="margin-top: 20px; text-align: center; font-size: 8px; color: #475569;">
-        Last Updated: ${new Date().toLocaleString()}
+    Last Updated: ${new Date().toLocaleString('en-US', { timeZone: 'America/New_York' })}
     </div>
 </body>
 </body>
