@@ -92,17 +92,6 @@
             font-size: 10px;
             font-weight: bold;
         }
-
-        .loading, .error {
-            text-align: center;
-            padding: 40px;
-            font-size: 14px;
-            color: #a1a1aa;
-        }
-
-        .error {
-            color: var(--danger-color);
-        }
     </style>
 </head>
 <body>
@@ -112,10 +101,7 @@
         <span class="badge-cisa">CISA KEV Feed</span>
     </div>
 
-    <div id="loading" class="loading">Fetching latest exploit intelligence...</div>
-    <div id="error" class="error" style="display: none;">Failed to load threat feed. Check console logs for details.</div>
-
-    <table id="threat-table" style="display: none;">
+    <table>
         <thead>
             <tr>
                 <th style="width: 15%;">CVE ID</th>
@@ -125,89 +111,9 @@
                 <th style="width: 10%;">Ransomware?</th>
             </tr>
         </thead>
-        <tbody id="table-body">
+        <tbody id="threat-data">
             </tbody>
     </table>
 
-    <script>
-        // Target 1: A public GitHub mirror of the CISA KEV JSON (natively supports CORS/No proxy needed!)
-        const MIRROR_URL = 'https://raw.githubusercontent.com/EugenMayer/cisa-known-exploited-mirror/main/known_exploited_vulnerabilities.json';
-        
-        // Target 2 (Fallback): Official CISA routed through a different CORS proxy
-        const FALLBACK_URL = 'https://corsproxy.io/?url=https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json';
-
-        async function fetchThreats() {
-            try {
-                console.log("Attempting to fetch from CORS-friendly GitHub Mirror...");
-                let response = await fetch(MIRROR_URL);
-                
-                if (!response.ok) {
-                    console.warn("Mirror failed. Attempting fallback proxy...");
-                    response = await fetch(FALLBACK_URL);
-                }
-
-                if (!response.ok) throw new Error('Both primary and fallback sources failed.');
-                
-                const data = await response.json();
-                const vulnerabilities = data.vulnerabilities || [];
-                
-                // Sort by dateAdded descending and take the top 10
-                const latestThreats = vulnerabilities
-                    .sort((a, b) => new Date(b.dateAdded) - new Date(a.dateAdded))
-                    .slice(0, 10);
-
-                renderTable(latestThreats);
-            } catch (error) {
-                console.error('Fetch Error:', error);
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('error').style.display = 'block';
-            }
-        }
-
-        function renderTable(threats) {
-            const tbody = document.getElementById('table-body');
-            tbody.innerHTML = '';
-
-            threats.forEach(threat => {
-                const tr = document.createElement('tr');
-                
-                const isRansomware = threat.knownRansomwareCampaignUse === 'Known';
-                const ransomwareBadge = isRansomware 
-                    ? '<span class="ransomware-tag">YES</span>' 
-                    : '<span style="color:#71717a">No</span>';
-
-                tr.innerHTML = `
-                    <td>
-                        <a class="cve-link" href="https://nvd.nist.gov/vuln/detail/${threat.cveID}" target="_blank">
-                            ${threat.cveID}
-                        </a>
-                    </td>
-                    <td><strong>${escapeHtml(threat.vendorProject)}</strong><br><span style="color:#a1a1aa">${escapeHtml(threat.product)}</span></td>
-                    <td>
-                        <strong>${escapeHtml(threat.vulnerabilityName)}</strong>
-                        <div style="font-size:11px; color:#a1a1aa; margin-top:4px;">${escapeHtml(threat.shortDescription)}</div>
-                    </td>
-                    <td style="white-space: nowrap;">${threat.dateAdded}</td>
-                    <td style="text-align: center;">${ransomwareBadge}</td>
-                `;
-                tbody.appendChild(tr);
-            });
-
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('threat-table').style.display = 'table';
-        }
-
-        function escapeHtml(str) {
-            if (!str) return '';
-            return str
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
-        }
-
-        fetchThreats();
-    </script>
 </body>
 </html>
