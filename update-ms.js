@@ -2,62 +2,77 @@ const fs = require('fs');
 
 async function updateMicrosoftIssues() {
     try {
-        console.log('Fetching Microsoft Release Health information...');
+        console.log('Fetching Microsoft Security Update RSS Feed...');
         
-        // Fetching from a reliable parsed endpoint of the Microsoft Release Health feed
-        const response = await fetch('https://senserva.com/api/hot.json');
-        if (!response.ok) throw new Error('Failed to fetch Microsoft updates API');
+        // Fetch the official Microsoft Security Response Center RSS feed
+        const response = await fetch('https://api.msrc.microsoft.com/update-guide/rss');
+        if (!response.ok) throw new Error('Failed to fetch MSRC feed');
         
-        const rawData = await response.json();
+        const xmlText = await response.text();
         
-        // Grab the top 10 most critical/hot Microsoft updates
-        const issues = (rawData.patches || [])
-            .slice(0, 10);
+        // Use a lightweight regex parser to extract RSS items without needing external npm packages
+        const items = [];
+        const itemRegex = /<item>([\s\S]*?)<\/item>/g;
+        let match;
+        
+        while ((match = itemRegex.exec(xmlText)) !== null && items.length < 10) {
+            const itemContent = match[1];
+            
+            const title = (itemContent.match(/<title>([\s\S]*?)<\/title>/) || [])[1] || 'Security Update';
+            const link = (itemContent.match(/<link>([\s\S]*?)<\/link>/) || [])[1] || 'https://msrc.microsoft.com/update-guide';
+            const description = (itemContent.match(/<description>([\s\S]*?)<\/description>/) || [])[1] || '';
+            const pubDate = (itemContent.match(/<pubDate>([\s\S]*?)<\/pubDate>/) || [])[1] || '';
+            
+            // Extract KB/CVE number if mentioned in the title/desc
+            const kbMatch = title.match(/KB\s*(\d+)/i) || description.match(/KB\s*(\d+)/i);
+            const kb = kbMatch ? kbMatch[1] : 'N/A';
+            
+            const cveMatch = title.match(/CVE-\d+-\d+/i) || description.match(/CVE-\d+-\d+/i);
+            const cve = cveMatch ? cveMatch[0] : 'N/A';
+
+            items.push({ title, link, description, pubDate, kb, cve });
+        }
 
         let cardHtml = '';
         
-        if (issues.length === 0) {
+        if (items.length === 0) {
             cardHtml = `
             <div style="text-align: center; color: var(--text-secondary); padding: 20px;">
                 No active critical issues reported at this time.
             </div>`;
         } else {
-            issues.forEach(issue => {
-                // Determine severity badge styling dynamically
-                let severityBadge = '';
-                const score = parseFloat(issue.score || 0);
-                
-                if (score >= 7.5 || issue.isKev) {
-                    severityBadge = '<span class="status-active">Critical / Exploited</span>';
-                } else if (score >= 5.0) {
-                    severityBadge = '<span class="status-mitigated">Important</span>';
-                } else {
-                    severityBadge = '<span class="status-resolved">Moderate</span>';
-                }
+            items.forEach(issue => {
+                // Formatting date nicely
+                const cleanDate = issue.pubDate ? new Date(issue.pubDate).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                }) : 'Recently';
 
-                const kbLink = issue.kb 
-                    ? `<a class="source-link" href="https://support.microsoft.com/help/${issue.kb}" target="_blank">KB${issue.kb} Detail &rarr;</a>`
-                    : `<a class="source-link" href="https://learn.microsoft.com/en-us/windows/release-health/" target="_blank">Release Health &rarr;</a>`;
+                // Format description to remove raw HTML tags if any exist
+                let cleanDesc = issue.description
+                    .replace(/<[^>]*>/g, '') // strip HTML tags
+                    .replace(/&lt;.*?&gt;/g, '') // strip escaped tags
+                    .substring(0, 180) + '...';
 
                 cardHtml += `
             <div class="issue-card">
                 <div class="card-header">
-                    <span class="platform-badge">${escapeHtml(issue.vendor || 'Microsoft')}</span>
-                    ${severityBadge}
+                    <span class="platform-badge">${escapeHtml(issue.cve !== 'N/A' ? issue.cve : 'Security Advisory')}</span>
+                    <span class="status-active">Active Update</span>
                 </div>
                 <div class="issue-title">
-                    ${escapeHtml(issue.title || 'Security Update')}
+                    ${escapeHtml(issue.title.replace(/&amp;/g, '&'))}
                 </div>
                 <div class="issue-details">
-                    <strong>KB:</strong> ${issue.kb ? `KB${issue.kb}` : 'N/A'} &bull; 
-                    <strong>CVSS:</strong> ${issue.score || 'N/A'} &bull;
-                    <strong>Published:</strong> ${escapeHtml(issue.dateAdded || 'Recently')}
+                    <strong>KB:</strong> ${issue.kb !== 'N/A' ? `KB${issue.kb}` : 'See Link'} &bull; 
+                    <strong>Released:</strong> ${cleanDate}
                 </div>
                 <div class="description">
-                    ${escapeHtml(issue.summary || 'Check the KB detail link to view impacted platforms, CVE associations, and patch installation steps.')}
+                    ${escapeHtml(cleanDesc)}
                 </div>
                 <div class="card-footer">
-                    ${kbLink}
+                    <a class="source-link" href="${issue.link}" target="_blank">View MSRC Advisory &rarr;</a>
                 </div>
             </div>`;
             });
@@ -80,7 +95,7 @@ async function updateMicrosoftIssues() {
             
             --resolved: #10b981;
             --mitigated: #f59e0b;
-            --active: #ef4444;
+            --active: #f43f5e;
         }
 
         body {
@@ -114,14 +129,14 @@ async function updateMicrosoftIssues() {
         .feed-indicator {
             width: 8px;
             height: 8px;
-            background-color: var(--accent);
+            background-color: var(--active);
             border-radius: 50%;
             display: inline-block;
-            box-shadow: 0 0 8px var(--accent);
+            box-shadow: 0 0 8px var(--active);
         }
 
         .badge-ms {
-            background-color: #f25022; /* Microsoft Red/Orange */
+            background-color: #0078d4; /* Microsoft Blue */
             color: #ffffff;
             padding: 2px 6px;
             border-radius: 4px;
@@ -155,7 +170,7 @@ async function updateMicrosoftIssues() {
         }
 
         .platform-badge {
-            background-color: rgba(0, 120, 212, 0.1);
+            background-color: rgba(59, 130, 246, 0.1);
             color: #60a5fa;
             padding: 2px 6px;
             border-radius: 4px;
@@ -165,18 +180,6 @@ async function updateMicrosoftIssues() {
 
         .status-active {
             color: var(--active);
-            font-size: 11px;
-            font-weight: bold;
-        }
-
-        .status-mitigated {
-            color: var(--mitigated);
-            font-size: 11px;
-            font-weight: bold;
-        }
-
-        .status-resolved {
-            color: var(--resolved);
             font-size: 11px;
             font-weight: bold;
         }
@@ -234,8 +237,8 @@ async function updateMicrosoftIssues() {
 <body>
 
     <div class="header">
-        <h2><span class="feed-indicator"></span> Microsoft Hot Patches & Issues</h2>
-        <span class="badge-ms">MSRC Feed</span>
+        <h2><span class="feed-indicator"></span> Microsoft Security Updates</h2>
+        <span class="badge-ms">MSRC RSS</span>
     </div>
 
     <div class="issue-container">
@@ -243,14 +246,14 @@ async function updateMicrosoftIssues() {
     </div>
 
     <div style="margin-top: 15px; text-align: center;" class="attribution">
-        Data provided by <a href="https://senserva.com" target="_blank">Senserva</a>
+        Source: Official Microsoft Security Response Center Feed
     </div>
 
 </body>
 </html>`;
 
         fs.writeFileSync('issues.html', fullHtml);
-        console.log('Successfully generated issues.html!');
+        console.log('Successfully generated issues.html with MSRC data!');
     } catch (err) {
         console.error('Error during Microsoft dashboard compile:', err);
         process.exit(1);
