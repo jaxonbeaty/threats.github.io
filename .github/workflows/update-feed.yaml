@@ -2,30 +2,31 @@ name: Update Threat Dashboard
 
 on:
   schedule:
-    - cron: '0 * * * *' # Every hour
-  workflow_dispatch: # Manual run button
+    - cron: '0 * * * *' # Runs hourly
+  workflow_dispatch: # Allows manual runs
 
 jobs:
-  update-dashboard:
+  build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-size: '20'
 
-      - name: Run parser script
+      - name: Run CISA update
         run: node update.js
 
-      - name: Commit and push changes
+      - name: Run Microsoft update
+        run: node update-ms.js
+
+      - name: Commit and push updates
         run: |
-          git config --global user.name "GitHub Action"
-          git config --global user.email "action@github.com"
-          git add index.html
-          git diff-index --quiet HEAD || git commit -m "Automated hourly threat update"
+          git config --global user.name "github-actions[bot]"
+          git config --global user-email "github-actions[bot]@users.noreply.github.com"
+          git add index.html issues.html
+          git commit -m "Auto-update CISA & MS Known Issues feeds" || exit 0
           git push
