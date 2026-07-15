@@ -130,7 +130,9 @@
     </table>
 
     <script>
-        const FEED_URL = 'https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json';
+        // We route the CISA URL through AllOrigins CORS proxy to bypass browser security blocks
+        const CISA_URL = 'https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json';
+        const FEED_URL = `https://api.allorigins.win/raw?url=${encodeURIComponent(CISA_URL)}`;
 
         async function fetchThreats() {
             try {
@@ -139,7 +141,6 @@
                 
                 const data = await response.json();
                 
-                // CISA KEV returns an array called 'vulnerabilities'
                 const vulnerabilities = data.vulnerabilities || [];
                 
                 // Sort by dateAdded descending and take the top 10
@@ -162,7 +163,6 @@
             threats.forEach(threat => {
                 const tr = document.createElement('tr');
                 
-                // Check if known to be associated with ransomware
                 const isRansomware = threat.knownRansomwareCampaignUse === 'Known';
                 const ransomwareBadge = isRansomware 
                     ? '<span class="ransomware-tag">YES</span>' 
@@ -189,7 +189,6 @@
             document.getElementById('threat-table').style.display = 'table';
         }
 
-        // Helper to prevent XSS issues when rendering raw strings
         function escapeHtml(str) {
             if (!str) return '';
             return str
