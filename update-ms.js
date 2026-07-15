@@ -251,7 +251,10 @@ async function updateMicrosoftIssues() {
     <div style="margin-top: 15px; text-align: center;" class="attribution">
         Source: Official Microsoft Security Response Center Feed
     </div>
-
+    <div style="margin-top: 20px; text-align: center; font-size: 8px; color: #475569;">
+        Last Updated: ${new Date().toLocaleString()}
+    </div>
+</body>
 </body>
 </html>`;
 
