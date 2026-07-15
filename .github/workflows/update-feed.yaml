@@ -1,0 +1,65 @@
+name: Update Threat Dashboard
+
+on:
+  schedule:
+    - cron: '0 * * * *' # Auto-updates every hour
+  workflow_dispatch: # Allows you to manually trigger it
+
+jobs:
+  update-dashboard:
+    runs-on: ubuntu-latest
+    # This explicitly grants the GITHUB_TOKEN write access for this job
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Fetch and compile CISA KEV
+        run: |
+          curl -s "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json" > cisa.json
+          
+          node -e '
+            const fs = require("fs");
+            const data = JSON.parse(fs.readFileSync("cisa.json", "utf8"));
+            const threats = data.vulnerabilities
+              .sort((a, b) => new Date(b.dateAdded) - new Date(a.dateAdded))
+              .slice(0, 10);
+            
+            let htmlRows = "";
+            threats.forEach(t => {
+              const rBadge = t.knownRansomwareCampaignUse === "Known" 
+                ? `<span class="ransomware-tag">YES</span>` 
+                : `<span style="color:#71717a">No</span>`;
+                
+              htmlRows += `
+                <tr>
+                    <td>
+                        <a class="cve-link" href="https://nvd.nist.gov/vuln/detail/\${t.cveID}" target="_blank">
+                            \${t.cveID}
+                        </a>
+                    </td>
+                    <td><strong>\${t.vendorProject}</strong><br><span style="color:#a1a1aa">\${t.product}</span></td>
+                    <td>
+                        <strong>\${t.vulnerabilityName}</strong>
+                        <div style="font-size:11px; color:#a1a1aa; margin-top:4px;">\${t.shortDescription.replace(/"/g, "&quot;")}</div>
+                    </td>
+                    <td style="white-space: nowrap;">\${t.dateAdded}</td>
+                    <td style="text-align: center;">\${rBadge}</td>
+                </tr>`;
+            });
+            
+            let indexHtml = fs.readFileSync("index.html", "utf8");
+            const regex = /()[\\s\\S]*()/;
+            indexHtml = indexHtml.replace(regex, `$1${htmlRows}$2`);
+            fs.writeFileSync("index.html", indexHtml);
+          '
+          rm cisa.json
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "GitHub Action"
+          git config --global user.email "action@github.com"
+          git add index.html
+          git diff-index --quiet HEAD || git commit -m "Automated update of threat data"
+          git push
