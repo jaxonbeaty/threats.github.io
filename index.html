@@ -1,119 +1,141 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Global Cybersecurity Threats (CISA KEV)</title>
-    <style>
-        :root {
-            --bg-color: #1e1e24;
-            --card-bg: #2a2a35;
-            --text-color: #f3f4f6;
-            --accent-color: #3b82f6;
-            --danger-color: #ef4444;
-            --border-color: #3f3f46;
-        }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 12px;
-            font-size: 13px;
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 2px solid var(--border-color);
-            padding-bottom: 8px;
-            margin-bottom: 12px;
-        }
-
-        h2 {
-            margin: 0;
-            font-size: 16px;
-            font-weight: 600;
-            color: var(--text-color);
-        }
-
-        .badge-cisa {
-            background-color: var(--accent-color);
-            color: #fff;
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: bold;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-        }
-
-        th {
-            background-color: var(--card-bg);
-            color: #a1a1aa;
-            font-weight: 600;
-            padding: 8px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        td {
-            padding: 8px;
-            border-bottom: 1px solid var(--border-color);
-            vertical-align: top;
-        }
-
-        tr:hover {
-            background-color: rgba(255, 255, 255, 0.02);
-        }
-
-        .cve-link {
-            color: #60a5fa;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        .cve-link:hover {
-            text-decoration: underline;
-        }
-
-        .ransomware-tag {
-            display: inline-block;
-            background-color: rgba(239, 68, 68, 0.2);
-            color: var(--danger-color);
-            border: 1px solid var(--danger-color);
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 10px;
-            font-weight: bold;
-        }
-    </style>
-</head>
-<body>
-
-    <div class="header">
-        <h2>Active Global Threats</h2>
-        <span class="badge-cisa">CISA KEV Feed</span>
-    </div>
-
-    <table>
-        <thead>
             <tr>
-                <th style="width: 15%;">CVE ID</th>
-                <th style="width: 20%;">Vendor / Product</th>
-                <th style="width: 45%;">Vulnerability</th>
-                <th style="width: 10%;">Added</th>
-                <th style="width: 10%;">Ransomware?</th>
+                <td>
+                    <a class="cve-link" href="https://nvd.nist.gov/vuln/detail/CVE-2026-46817" target="_blank">
+                        CVE-2026-46817
+                    </a>
+                </td>
+                <td><strong>Oracle</strong><br><span style="color:#a1a1aa">E-Business Suite</span></td>
+                <td>
+                    <strong>Oracle E-Business Suite Improper Privilege Management Vulnerability</strong>
+                    <div style="font-size:11px; color:#a1a1aa; margin-top:4px;">Oracle E-Business Suite contains an improper privilege management vulnerability that allows an unauthenticated attacker with network access via HTTP to compromise Oracle Payments. Successful attacks of this vulnerability can result in takeover of Oracle Payments.</div>
+                </td>
+                <td style="white-space: nowrap;">2026-07-15</td>
+                <td style="text-align: center;"><span style="color:#71717a">No</span></td>
             </tr>
-        </thead>
-        <tbody id="threat-data">
-            </tbody>
-    </table>
-
-</body>
-</html>
+            <tr>
+                <td>
+                    <a class="cve-link" href="https://nvd.nist.gov/vuln/detail/CVE-2023-4346" target="_blank">
+                        CVE-2023-4346
+                    </a>
+                </td>
+                <td><strong>KNX Association</strong><br><span style="color:#a1a1aa">KNX Protocol Connection Authorization Option 1</span></td>
+                <td>
+                    <strong>KNX Association KNX Protocol Connection Authorization Option 1 Overly Restrictive Account Lockout Mechanism Vulnerability</strong>
+                    <div style="font-size:11px; color:#a1a1aa; margin-top:4px;">KNX Association KNX Protocol Connection Authorization Option 1 contains an overly restrictive account lockout mechanism vulnerability that could allow an attacker to purge all devices without additional security options enabled and set a BCU key to lock the device. </div>
+                </td>
+                <td style="white-space: nowrap;">2026-07-15</td>
+                <td style="text-align: center;"><span style="color:#71717a">No</span></td>
+            </tr>
+            <tr>
+                <td>
+                    <a class="cve-link" href="https://nvd.nist.gov/vuln/detail/CVE-2026-56155" target="_blank">
+                        CVE-2026-56155
+                    </a>
+                </td>
+                <td><strong>Microsoft</strong><br><span style="color:#a1a1aa">Active Directory Federation Services</span></td>
+                <td>
+                    <strong>Microsoft Active Directory Federation Services Insufficient Granularity of Access Control Vulnerability </strong>
+                    <div style="font-size:11px; color:#a1a1aa; margin-top:4px;">Microsoft Active Directory Federation Services contains an insufficient granularity of access control vulnerability that allows an authorized attacker to elevate privileges locally.</div>
+                </td>
+                <td style="white-space: nowrap;">2026-07-14</td>
+                <td style="text-align: center;"><span style="color:#71717a">No</span></td>
+            </tr>
+            <tr>
+                <td>
+                    <a class="cve-link" href="https://nvd.nist.gov/vuln/detail/CVE-2026-56164" target="_blank">
+                        CVE-2026-56164
+                    </a>
+                </td>
+                <td><strong>Microsoft</strong><br><span style="color:#a1a1aa">SharePoint Server</span></td>
+                <td>
+                    <strong>Microsoft SharePoint Server Missing Authentication for Critical Function Vulnerability</strong>
+                    <div style="font-size:11px; color:#a1a1aa; margin-top:4px;">Microsoft SharePoint contains a missing authentication for critical function vulnerability that allows an unauthorized attacker to elevate privileges over a network.</div>
+                </td>
+                <td style="white-space: nowrap;">2026-07-14</td>
+                <td style="text-align: center;"><span style="color:#71717a">No</span></td>
+            </tr>
+            <tr>
+                <td>
+                    <a class="cve-link" href="https://nvd.nist.gov/vuln/detail/CVE-2026-15409" target="_blank">
+                        CVE-2026-15409
+                    </a>
+                </td>
+                <td><strong>SonicWall</strong><br><span style="color:#a1a1aa">SMA1000 Appliances</span></td>
+                <td>
+                    <strong>SonicWall SMA1000 Appliances Server-Side Request Forgery Vulnerability</strong>
+                    <div style="font-size:11px; color:#a1a1aa; margin-top:4px;">SonicWall SMA1000 Appliances contain a server-side request forgery vulnerability that could allow a remote unauthenticated attacker to potentially cause the appliance to make requests to unintended location.</div>
+                </td>
+                <td style="white-space: nowrap;">2026-07-14</td>
+                <td style="text-align: center;"><span style="color:#71717a">No</span></td>
+            </tr>
+            <tr>
+                <td>
+                    <a class="cve-link" href="https://nvd.nist.gov/vuln/detail/CVE-2026-15410" target="_blank">
+                        CVE-2026-15410
+                    </a>
+                </td>
+                <td><strong>SonicWall</strong><br><span style="color:#a1a1aa">SMA1000 Appliances</span></td>
+                <td>
+                    <strong>SonicWall SMA1000 Appliances Code Injection Vulnerability</strong>
+                    <div style="font-size:11px; color:#a1a1aa; margin-top:4px;">SonicWall SMA1000 Appliances contain a code injection vulnerability which in specific conditions could potentially enable a remote authenticated attacker as administrator to execute arbitrary OS commands.</div>
+                </td>
+                <td style="white-space: nowrap;">2026-07-14</td>
+                <td style="text-align: center;"><span style="color:#71717a">No</span></td>
+            </tr>
+            <tr>
+                <td>
+                    <a class="cve-link" href="https://nvd.nist.gov/vuln/detail/CVE-2008-4128" target="_blank">
+                        CVE-2008-4128
+                    </a>
+                </td>
+                <td><strong>Cisco</strong><br><span style="color:#a1a1aa">IOS</span></td>
+                <td>
+                    <strong>Cisco IOS Cross-Site Request Forgery Vulnerability</strong>
+                    <div style="font-size:11px; color:#a1a1aa; margin-top:4px;">Cisco IOS 12.4 contains multiple cross-site forgery vulnerabilities that allows remote attackers to execute arbitrary commands via (1) a certain &quot;show privilege&quot; command to the /level/15/exec/- URI, and (2) a certain &quot;alias exec&quot; command to the /level/15/exec/-/configure/http URI.</div>
+                </td>
+                <td style="white-space: nowrap;">2026-07-13</td>
+                <td style="text-align: center;"><span style="color:#71717a">No</span></td>
+            </tr>
+            <tr>
+                <td>
+                    <a class="cve-link" href="https://nvd.nist.gov/vuln/detail/CVE-2026-56291" target="_blank">
+                        CVE-2026-56291
+                    </a>
+                </td>
+                <td><strong>Balbooa</strong><br><span style="color:#a1a1aa">Forms</span></td>
+                <td>
+                    <strong>Balbooa Forms Unrestricted Upload of File with Dangerous Type Vulnerability</strong>
+                    <div style="font-size:11px; color:#a1a1aa; margin-top:4px;">Balbooa Forms contains an unrestricted upload of file with dangerous type vulnerability that allows an unauthenticated arbitrary file upload which could allow uploading of executable files leading to full RCE.</div>
+                </td>
+                <td style="white-space: nowrap;">2026-07-10</td>
+                <td style="text-align: center;"><span style="color:#71717a">No</span></td>
+            </tr>
+            <tr>
+                <td>
+                    <a class="cve-link" href="https://nvd.nist.gov/vuln/detail/CVE-2026-48939" target="_blank">
+                        CVE-2026-48939
+                    </a>
+                </td>
+                <td><strong>iCagenda</strong><br><span style="color:#a1a1aa">iCagenda</span></td>
+                <td>
+                    <strong>iCagenda Unrestricted Upload of File with Dangerous Type Vulnerability</strong>
+                    <div style="font-size:11px; color:#a1a1aa; margin-top:4px;">iCagenda contains an unrestricted upload of file with dangerous type vulnerability that allows the upload of arbitrary files in the file attachment feature, ultimately resulting in PHP code upload and execution.</div>
+                </td>
+                <td style="white-space: nowrap;">2026-07-10</td>
+                <td style="text-align: center;"><span style="color:#71717a">No</span></td>
+            </tr>
+            <tr>
+                <td>
+                    <a class="cve-link" href="https://nvd.nist.gov/vuln/detail/CVE-2026-48908" target="_blank">
+                        CVE-2026-48908
+                    </a>
+                </td>
+                <td><strong>JoomShaper</strong><br><span style="color:#a1a1aa">SP Page Builder</span></td>
+                <td>
+                    <strong>JoomShaper SP Page Builder Unrestricted Upload of File with Dangerous Type Vulnerability</strong>
+                    <div style="font-size:11px; color:#a1a1aa; margin-top:4px;">JoomShaper SP Page Builder contains an unrestricted upload of file with dangerous type vulnerability that allows unauthenticated users to upload arbitrary files, ultimately resulting in the upload and execution of PHP code.</div>
+                </td>
+                <td style="white-space: nowrap;">2026-07-07</td>
+                <td style="text-align: center;"><span style="color:#71717a">No</span></td>
+            </tr>
