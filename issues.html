@@ -1,8 +1,188 @@
 <!DOCTYPE html>
-<html>
-<head><title>Loading Feed...</title></head>
-<body style="background:#0f172a; color:#f8fafc; font-family:sans-serif; padding:20px;">
-    <h2>Loading Microsoft Known Issues feed...</h2>
-    <p>The automated update script will populate this page shortly.</p>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Microsoft Known Issues</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent: #0078d4; /* Microsoft Blue */
+            --border: #334155;
+            
+            --resolved: #10b981;
+            --mitigated: #f59e0b;
+            --active: #ef4444;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 12px;
+            font-size: 13px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+            margin-bottom: 12px;
+        }
+
+        h2 {
+            margin: 0;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .feed-indicator {
+            width: 8px;
+            height: 8px;
+            background-color: var(--accent);
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 8px var(--accent);
+        }
+
+        .badge-ms {
+            background-color: #f25022; /* Microsoft Red/Orange */
+            color: #ffffff;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .issue-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .issue-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 12px;
+            transition: transform 0.15s ease, border-color 0.15s ease;
+        }
+
+        .issue-card:hover {
+            border-color: #475569;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .platform-badge {
+            background-color: rgba(0, 120, 212, 0.1);
+            color: #60a5fa;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .status-active {
+            color: var(--active);
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .status-mitigated {
+            color: var(--mitigated);
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .status-resolved {
+            color: var(--resolved);
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .issue-title {
+            font-weight: 700;
+            font-size: 13px;
+            color: #f1f5f9;
+            margin-bottom: 4px;
+            line-height: 1.3;
+        }
+
+        .issue-details {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .description {
+            font-size: 11px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+            margin-bottom: 8px;
+        }
+
+        .card-footer {
+            margin-top: 4px;
+            font-size: 11px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .attribution {
+            color: #475569;
+            font-size: 9px;
+        }
+
+        .attribution a {
+            color: #475569;
+            text-decoration: none;
+        }
+
+        .source-link {
+            color: #3b82f6;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .source-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h2><span class="feed-indicator"></span> Microsoft Hot Patches & Issues</h2>
+        <span class="badge-ms">MSRC Feed</span>
+    </div>
+
+    <div class="issue-container">
+        
+            <div style="text-align: center; color: var(--text-secondary); padding: 20px;">
+                No active critical issues reported at this time.
+            </div>
+    </div>
+
+    <div style="margin-top: 15px; text-align: center;" class="attribution">
+        Data provided by <a href="https://senserva.com" target="_blank">Senserva</a>
+    </div>
+
 </body>
 </html>
