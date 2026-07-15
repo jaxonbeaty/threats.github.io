@@ -113,7 +113,7 @@
     </div>
 
     <div id="loading" class="loading">Fetching latest exploit intelligence...</div>
-    <div id="error" class="error" style="display: none;">Failed to load threat feed.</div>
+    <div id="error" class="error" style="display: none;">Failed to load threat feed. Check console logs for details.</div>
 
     <table id="threat-table" style="display: none;">
         <thead>
@@ -130,17 +130,25 @@
     </table>
 
     <script>
-        // We route the CISA URL through AllOrigins CORS proxy to bypass browser security blocks
-        const CISA_URL = 'https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json';
-        const FEED_URL = `https://api.allorigins.win/raw?url=${encodeURIComponent(CISA_URL)}`;
+        // Target 1: A public GitHub mirror of the CISA KEV JSON (natively supports CORS/No proxy needed!)
+        const MIRROR_URL = 'https://raw.githubusercontent.com/EugenMayer/cisa-known-exploited-mirror/main/known_exploited_vulnerabilities.json';
+        
+        // Target 2 (Fallback): Official CISA routed through a different CORS proxy
+        const FALLBACK_URL = 'https://corsproxy.io/?url=https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json';
 
         async function fetchThreats() {
             try {
-                const response = await fetch(FEED_URL);
-                if (!response.ok) throw new Error('Network response failure');
+                console.log("Attempting to fetch from CORS-friendly GitHub Mirror...");
+                let response = await fetch(MIRROR_URL);
+                
+                if (!response.ok) {
+                    console.warn("Mirror failed. Attempting fallback proxy...");
+                    response = await fetch(FALLBACK_URL);
+                }
+
+                if (!response.ok) throw new Error('Both primary and fallback sources failed.');
                 
                 const data = await response.json();
-                
                 const vulnerabilities = data.vulnerabilities || [];
                 
                 // Sort by dateAdded descending and take the top 10
@@ -150,7 +158,7 @@
 
                 renderTable(latestThreats);
             } catch (error) {
-                console.error('Error fetching data:', error);
+                console.error('Fetch Error:', error);
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('error').style.display = 'block';
             }
