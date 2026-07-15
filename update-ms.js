@@ -4,53 +4,64 @@ async function updateMicrosoftIssues() {
     try {
         console.log('Fetching Microsoft Release Health information...');
         
-        // Fetching from a reliable, open endpoint for Windows & MS updates
-        const response = await fetch('https://feed.releasebot.io/updates/microsoft/windows');
-        if (!response.ok) throw new Error('Failed to fetch Microsoft updates feed');
+        // Fetching from a reliable parsed endpoint of the Microsoft Release Health feed
+        const response = await fetch('https://senserva.com/api/hot.json');
+        if (!response.ok) throw new Error('Failed to fetch Microsoft updates API');
         
         const rawData = await response.json();
         
-        // Grabbing the most recent 10 issues/news items
-        const issues = (rawData.items || rawData.updates || [])
+        // Grab the top 10 most critical/hot Microsoft updates
+        const issues = (rawData.patches || [])
             .slice(0, 10);
 
         let cardHtml = '';
-        issues.forEach(issue => {
-            // Determine status color styling dynamically
-            let statusBadge = '';
-            const statusLower = (issue.status || '').toLowerCase();
-            
-            if (statusLower.includes('resolved') || statusLower.includes('fixed')) {
-                statusBadge = '<span class="status-resolved">Resolved</span>';
-            } else if (statusLower.includes('mitigated') || statusLower.includes('workaround')) {
-                statusBadge = '<span class="status-mitigated">Mitigated</span>';
-            } else {
-                statusBadge = '<span class="status-active">Active / Confirmed</span>';
-            }
+        
+        if (issues.length === 0) {
+            cardHtml = `
+            <div style="text-align: center; color: var(--text-secondary); padding: 20px;">
+                No active critical issues reported at this time.
+            </div>`;
+        } else {
+            issues.forEach(issue => {
+                // Determine severity badge styling dynamically
+                let severityBadge = '';
+                const score = parseFloat(issue.score || 0);
+                
+                if (score >= 7.5 || issue.isKev) {
+                    severityBadge = '<span class="status-active">Critical / Exploited</span>';
+                } else if (score >= 5.0) {
+                    severityBadge = '<span class="status-mitigated">Important</span>';
+                } else {
+                    severityBadge = '<span class="status-resolved">Moderate</span>';
+                }
 
-            cardHtml += `
-        <div class="issue-card">
-            <div class="card-header">
-                <span class="platform-badge">${escapeHtml(issue.platform || 'Windows 11 / Server')}</span>
-                ${statusBadge}
-            </div>
-            <div class="issue-title">
-                ${escapeHtml(issue.title || 'Windows Update Status Change')}
-            </div>
-            <div class="issue-details">
-                <strong>KB Affected:</strong> ${escapeHtml(issue.kbArticle || 'N/A')} &bull; 
-                <strong>Updated:</strong> ${escapeHtml(issue.dateAdded || issue.published_at || 'Recently')}
-            </div>
-            <div class="description">
-                ${escapeHtml(issue.description || issue.summary || 'Click the link to read Microsoft\'s full advisory and mitigation steps.')}
-            </div>
-            <div class="card-footer">
-                <a class="source-link" href="${issue.url || 'https://learn.microsoft.com/en-us/windows/release-health/'}" target="_blank">
-                    View Microsoft Advisory &rarr;
-                </a>
-            </div>
-        </div>`;
-        });
+                const kbLink = issue.kb 
+                    ? `<a class="source-link" href="https://support.microsoft.com/help/${issue.kb}" target="_blank">KB${issue.kb} Detail &rarr;</a>`
+                    : `<a class="source-link" href="https://learn.microsoft.com/en-us/windows/release-health/" target="_blank">Release Health &rarr;</a>`;
+
+                cardHtml += `
+            <div class="issue-card">
+                <div class="card-header">
+                    <span class="platform-badge">${escapeHtml(issue.vendor || 'Microsoft')}</span>
+                    ${severityBadge}
+                </div>
+                <div class="issue-title">
+                    ${escapeHtml(issue.title || 'Security Update')}
+                </div>
+                <div class="issue-details">
+                    <strong>KB:</strong> ${issue.kb ? `KB${issue.kb}` : 'N/A'} &bull; 
+                    <strong>CVSS:</strong> ${issue.score || 'N/A'} &bull;
+                    <strong>Published:</strong> ${escapeHtml(issue.dateAdded || 'Recently')}
+                </div>
+                <div class="description">
+                    ${escapeHtml(issue.summary || 'Check the KB detail link to view impacted platforms, CVE associations, and patch installation steps.')}
+                </div>
+                <div class="card-footer">
+                    ${kbLink}
+                </div>
+            </div>`;
+            });
+        }
 
         const fullHtml = `<!DOCTYPE html>
 <html lang="en">
@@ -64,7 +75,7 @@ async function updateMicrosoftIssues() {
             --card-bg: #1e293b;
             --text-primary: #f8fafc;
             --text-secondary: #94a3b8;
-            --accent: #00a4ef; /* Microsoft Blue */
+            --accent: #0078d4; /* Microsoft Blue */
             --border: #334155;
             
             --resolved: #10b981;
@@ -144,7 +155,7 @@ async function updateMicrosoftIssues() {
         }
 
         .platform-badge {
-            background-color: rgba(59, 130, 246, 0.1);
+            background-color: rgba(0, 120, 212, 0.1);
             color: #60a5fa;
             padding: 2px 6px;
             border-radius: 4px;
@@ -193,12 +204,25 @@ async function updateMicrosoftIssues() {
 
         .card-footer {
             margin-top: 4px;
+            font-size: 11px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .attribution {
+            color: #475569;
+            font-size: 9px;
+        }
+
+        .attribution a {
+            color: #475569;
+            text-decoration: none;
         }
 
         .source-link {
             color: #3b82f6;
             text-decoration: none;
-            font-size: 11px;
             font-weight: 600;
         }
 
@@ -210,12 +234,16 @@ async function updateMicrosoftIssues() {
 <body>
 
     <div class="header">
-        <h2><span class="feed-indicator"></span> Microsoft Known Issues</h2>
-        <span class="badge-ms">Release Health</span>
+        <h2><span class="feed-indicator"></span> Microsoft Hot Patches & Issues</h2>
+        <span class="badge-ms">MSRC Feed</span>
     </div>
 
     <div class="issue-container">
         ${cardHtml}
+    </div>
+
+    <div style="margin-top: 15px; text-align: center;" class="attribution">
+        Data provided by <a href="https://senserva.com" target="_blank">Senserva</a>
     </div>
 
 </body>
