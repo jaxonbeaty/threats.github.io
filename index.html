@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Cybersecurity Threats (CISA KEV)</title>
+    <style>
+        :root {
+            --bg-color: #1e1e24;
+            --card-bg: #2a2a35;
+            --text-color: #f3f4f6;
+            --accent-color: #3b82f6;
+            --danger-color: #ef4444;
+            --border-color: #3f3f46;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 12px;
+            font-size: 13px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 8px;
+            margin-bottom: 12px;
+        }
+
+        h2 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .badge-cisa {
+            background-color: var(--accent-color);
+            color: #fff;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--card-bg);
+            color: #a1a1aa;
+            font-weight: 600;
+            padding: 8px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        td {
+            padding: 8px;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: top;
+        }
+
+        tr:hover {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+
+        .cve-link {
+            color: #60a5fa;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .cve-link:hover {
+            text-decoration: underline;
+        }
+
+        .ransomware-tag {
+            display: inline-block;
+            background-color: rgba(239, 68, 68, 0.2);
+            color: var(--danger-color);
+            border: 1px solid var(--danger-color);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .loading, .error {
+            text-align: center;
+            padding: 40px;
+            font-size: 14px;
+            color: #a1a1aa;
+        }
+
+        .error {
+            color: var(--danger-color);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h2>Active Global Threats</h2>
+        <span class="badge-cisa">CISA KEV Feed</span>
+    </div>
+
+    <div id="loading" class="loading">Fetching latest exploit intelligence...</div>
+    <div id="error" class="error" style="display: none;">Failed to load threat feed.</div>
+
+    <table id="threat-table" style="display: none;">
+        <thead>
+            <tr>
+                <th style="width: 15%;">CVE ID</th>
+                <th style="width: 20%;">Vendor / Product</th>
+                <th style="width: 45%;">Vulnerability</th>
+                <th style="width: 10%;">Added</th>
+                <th style="width: 10%;">Ransomware?</th>
+            </tr>
+        </thead>
+        <tbody id="table-body">
+            </tbody>
+    </table>
+
+    <script>
+        const FEED_URL = 'https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json';
+
+        async function fetchThreats() {
+            try {
+                const response = await fetch(FEED_URL);
+                if (!response.ok) throw new Error('Network response failure');
+                
+                const data = await response.json();
+                
+                // CISA KEV returns an array called 'vulnerabilities'
+                const vulnerabilities = data.vulnerabilities || [];
+                
+                // Sort by dateAdded descending and take the top 10
+                const latestThreats = vulnerabilities
+                    .sort((a, b) => new Date(b.dateAdded) - new Date(a.dateAdded))
+                    .slice(0, 10);
+
+                renderTable(latestThreats);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error').style.display = 'block';
+            }
+        }
+
+        function renderTable(threats) {
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+
+            threats.forEach(threat => {
+                const tr = document.createElement('tr');
+                
+                // Check if known to be associated with ransomware
+                const isRansomware = threat.knownRansomwareCampaignUse === 'Known';
+                const ransomwareBadge = isRansomware 
+                    ? '<span class="ransomware-tag">YES</span>' 
+                    : '<span style="color:#71717a">No</span>';
+
+                tr.innerHTML = `
+                    <td>
+                        <a class="cve-link" href="https://nvd.nist.gov/vuln/detail/${threat.cveID}" target="_blank">
+                            ${threat.cveID}
+                        </a>
+                    </td>
+                    <td><strong>${escapeHtml(threat.vendorProject)}</strong><br><span style="color:#a1a1aa">${escapeHtml(threat.product)}</span></td>
+                    <td>
+                        <strong>${escapeHtml(threat.vulnerabilityName)}</strong>
+                        <div style="font-size:11px; color:#a1a1aa; margin-top:4px;">${escapeHtml(threat.shortDescription)}</div>
+                    </td>
+                    <td style="white-space: nowrap;">${threat.dateAdded}</td>
+                    <td style="text-align: center;">${ransomwareBadge}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('threat-table').style.display = 'table';
+        }
+
+        // Helper to prevent XSS issues when rendering raw strings
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        fetchThreats();
+    </script>
+</body>
+</html>
