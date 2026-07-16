@@ -4,13 +4,10 @@ async function updateMicrosoftIssues() {
     try {
         console.log('Fetching Microsoft Security Update RSS Feed...');
         
-        // Fetch the official Microsoft Security Response Center RSS feed
         const response = await fetch('https://api.msrc.microsoft.com/update-guide/rss');
         if (!response.ok) throw new Error('Failed to fetch MSRC feed');
         
         const xmlText = await response.text();
-        
-        // Use a lightweight regex parser to extract RSS items
         const items = [];
         const itemRegex = /<item>([\s\S]*?)<\/item>/g;
         let match;
@@ -25,7 +22,6 @@ async function updateMicrosoftIssues() {
             
             const kbMatch = title.match(/KB\s*(\d+)/i) || description.match(/KB\s*(\d+)/i);
             const kb = kbMatch ? kbMatch[1] : 'N/A';
-            
             const cveMatch = title.match(/CVE-\d+-\d+/i) || description.match(/CVE-\d+-\d+/i);
             const cve = cveMatch ? cveMatch[0] : 'N/A';
 
@@ -33,44 +29,22 @@ async function updateMicrosoftIssues() {
         }
 
         let cardHtml = '';
-        
         if (items.length === 0) {
-            cardHtml = `
-            <div style="text-align: center; color: var(--text-secondary); padding: 20px;">
-                No active critical issues reported at this time.
-            </div>`;
+            cardHtml = `<div style="text-align: center; color: var(--text-secondary); padding: 20px;">No active critical issues reported at this time.</div>`;
         } else {
             items.forEach(issue => {
-                const cleanDate = issue.pubDate ? new Date(issue.pubDate).toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    year: 'numeric'
-                }) : 'Recently';
-
-                let cleanDesc = issue.description
-                    .replace(/<[^>]*>/g, '') 
-                    .replace(/&lt;.*?&gt;/g, '')
-                    .substring(0, 180) + '...';
-
+                const cleanDate = issue.pubDate ? new Date(issue.pubDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recently';
+                let cleanDesc = issue.description.replace(/<[^>]*>/g, '').replace(/&lt;.*?&gt;/g, '').substring(0, 180) + '...';
                 cardHtml += `
             <div class="issue-card">
                 <div class="card-header">
                     <span class="platform-badge">${escapeHtml(issue.cve !== 'N/A' ? issue.cve : 'Security Advisory')}</span>
                     <span class="status-active">Active Update</span>
                 </div>
-                <div class="issue-title">
-                    ${escapeHtml(issue.title.replace(/&amp;/g, '&'))}
-                </div>
-                <div class="issue-details">
-                    <strong>KB:</strong> ${issue.kb !== 'N/A' ? `KB${issue.kb}` : 'See Link'} &bull; 
-                    <strong>Released:</strong> ${cleanDate}
-                </div>
-                <div class="description">
-                    ${escapeHtml(cleanDesc)}
-                </div>
-                <div class="card-footer">
-                    <a class="source-link" href="${issue.link}" target="_blank">View MSRC Advisory &rarr;</a>
-                </div>
+                <div class="issue-title">${escapeHtml(issue.title.replace(/&amp;/g, '&'))}</div>
+                <div class="issue-details"><strong>KB:</strong> ${issue.kb !== 'N/A' ? `KB${issue.kb}` : 'See Link'} &bull; <strong>Released:</strong> ${cleanDate}</div>
+                <div class="description">${escapeHtml(cleanDesc)}</div>
+                <div class="card-footer"><a class="source-link" href="${issue.link}" target="_blank">View MSRC Advisory &rarr;</a></div>
             </div>`;
             });
         }
@@ -85,31 +59,21 @@ async function updateMicrosoftIssues() {
     <meta http-equiv="expires" content="0">
     <title>Microsoft Known Issues</title>
     <style>
-        :root {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
-            --accent: #0078d4;
-            --border: #334155;
-            --active: #f43f5e;
-        }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg-color); color: var(--text-primary); margin: 0; padding: 12px; font-size: 13px; }
+        :root { --bg-color: #0f172a; --card-bg: #1e293b; --text-primary: #f8fafc; --text-secondary: #94a3b8; --border: #334155; --active: #f43f5e; }
+        body { font-family: -apple-system, sans-serif; background-color: var(--bg-color); color: var(--text-primary); margin: 0; padding: 12px; font-size: 13px; }
         .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 12px; }
-        h2 { margin: 0; font-size: 15px; font-weight: 600; color: var(--text-primary); display: flex; align-items: center; gap: 6px; }
-        .feed-indicator { width: 8px; height: 8px; background-color: var(--active); border-radius: 50%; display: inline-block; box-shadow: 0 0 8px var(--active); }
+        h2 { margin: 0; font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+        .feed-indicator { width: 8px; height: 8px; background-color: var(--active); border-radius: 50%; box-shadow: 0 0 8px var(--active); }
         .badge-ms { background-color: #0078d4; color: #ffffff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; }
         .issue-container { display: flex; flex-direction: column; gap: 10px; }
         .issue-card { background-color: var(--card-bg); border: 1px solid var(--border); border-radius: 6px; padding: 12px; }
-        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .card-header { display: flex; justify-content: space-between; margin-bottom: 8px; }
         .platform-badge { background-color: rgba(59, 130, 246, 0.1); color: #60a5fa; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 600; }
         .status-active { color: var(--active); font-size: 11px; font-weight: bold; }
-        .issue-title { font-weight: 700; font-size: 13px; color: #f1f5f9; margin-bottom: 4px; line-height: 1.3; }
-        .issue-details { font-size: 11px; color: var(--text-secondary); margin-bottom: 8px; }
-        .description { font-size: 11px; color: var(--text-secondary); line-height: 1.4; margin-bottom: 8px; }
-        .card-footer { margin-top: 4px; font-size: 11px; }
+        .issue-title { font-weight: 700; font-size: 13px; margin-bottom: 4px; }
+        .issue-details, .description { font-size: 11px; color: var(--text-secondary); margin-bottom: 8px; }
         .source-link { color: #3b82f6; text-decoration: none; font-weight: 600; }
-        .attribution { color: #475569; font-size: 9px; }
+        .attribution { color: #475569; font-size: 9px; margin-top: 15px; text-align: center; }
     </style>
 </head>
 <body>
@@ -118,8 +82,11 @@ async function updateMicrosoftIssues() {
         <span class="badge-ms">MSRC RSS</span>
     </div>
     <div class="issue-container">${cardHtml}</div>
-    <div style="margin-top: 15px; text-align: center;" class="attribution">
-        Source: Official Microsoft Security Response Center Feed
+    <div class="attribution">
+        Source: Official Microsoft Security Response Center Feed <br>
+        <a href="https://x.com/msftsecresponse" target="_blank" style="color: #60a5fa; text-decoration: underline;">
+            Follow MSRC on X (Twitter) for real-time updates &rarr;
+        </a>
     </div>
     <div style="margin-top: 20px; text-align: center; font-size: 8px; color: #475569;">
         Last Updated (EST): ${new Date().toLocaleString('en-US', { timeZone: 'America/New_York' })}
@@ -137,12 +104,7 @@ async function updateMicrosoftIssues() {
 
 function escapeHtml(str) {
     if (!str) return '';
-    return str
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+    return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 }
 
 updateMicrosoftIssues();
