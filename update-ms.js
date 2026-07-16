@@ -10,7 +10,7 @@ async function updateMicrosoftIssues() {
         
         const xmlText = await response.text();
         
-        // Use a lightweight regex parser to extract RSS items without needing external npm packages
+        // Use a lightweight regex parser to extract RSS items
         const items = [];
         const itemRegex = /<item>([\s\S]*?)<\/item>/g;
         let match;
@@ -23,7 +23,6 @@ async function updateMicrosoftIssues() {
             const description = (itemContent.match(/<description>([\s\S]*?)<\/description>/) || [])[1] || '';
             const pubDate = (itemContent.match(/<pubDate>([\s\S]*?)<\/pubDate>/) || [])[1] || '';
             
-            // Extract KB/CVE number if mentioned in the title/desc
             const kbMatch = title.match(/KB\s*(\d+)/i) || description.match(/KB\s*(\d+)/i);
             const kb = kbMatch ? kbMatch[1] : 'N/A';
             
@@ -42,17 +41,15 @@ async function updateMicrosoftIssues() {
             </div>`;
         } else {
             items.forEach(issue => {
-                // Formatting date nicely
                 const cleanDate = issue.pubDate ? new Date(issue.pubDate).toLocaleDateString('en-US', {
                     month: 'short',
                     day: 'numeric',
                     year: 'numeric'
                 }) : 'Recently';
 
-                // Format description to remove raw HTML tags if any exist
                 let cleanDesc = issue.description
-                    .replace(/<[^>]*>/g, '') // strip HTML tags
-                    .replace(/&lt;.*?&gt;/g, '') // strip escaped tags
+                    .replace(/<[^>]*>/g, '') 
+                    .replace(/&lt;.*?&gt;/g, '')
                     .substring(0, 180) + '...';
 
                 cardHtml += `
@@ -93,168 +90,40 @@ async function updateMicrosoftIssues() {
             --card-bg: #1e293b;
             --text-primary: #f8fafc;
             --text-secondary: #94a3b8;
-            --accent: #0078d4; /* Microsoft Blue */
+            --accent: #0078d4;
             --border: #334155;
-            
-            --resolved: #10b981;
-            --mitigated: #f59e0b;
             --active: #f43f5e;
         }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-primary);
-            margin: 0;
-            padding: 12px;
-            font-size: 13px;
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 10px;
-            margin-bottom: 12px;
-        }
-
-        h2 {
-            margin: 0;
-            font-size: 15px;
-            font-weight: 600;
-            color: var(--text-primary);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .feed-indicator {
-            width: 8px;
-            height: 8px;
-            background-color: var(--active);
-            border-radius: 50%;
-            display: inline-block;
-            box-shadow: 0 0 8px var(--active);
-        }
-
-        .badge-ms {
-            background-color: #0078d4; /* Microsoft Blue */
-            color: #ffffff;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 10px;
-            font-weight: bold;
-        }
-
-        .issue-container {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .issue-card {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            padding: 12px;
-            transition: transform 0.15s ease, border-color 0.15s ease;
-        }
-
-        .issue-card:hover {
-            border-color: #475569;
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-
-        .platform-badge {
-            background-color: rgba(59, 130, 246, 0.1);
-            color: #60a5fa;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 10px;
-            font-weight: 600;
-        }
-
-        .status-active {
-            color: var(--active);
-            font-size: 11px;
-            font-weight: bold;
-        }
-
-        .issue-title {
-            font-weight: 700;
-            font-size: 13px;
-            color: #f1f5f9;
-            margin-bottom: 4px;
-            line-height: 1.3;
-        }
-
-        .issue-details {
-            font-size: 11px;
-            color: var(--text-secondary);
-            margin-bottom: 8px;
-        }
-
-        .description {
-            font-size: 11px;
-            color: var(--text-secondary);
-            line-height: 1.4;
-            margin-bottom: 8px;
-        }
-
-        .card-footer {
-            margin-top: 4px;
-            font-size: 11px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .attribution {
-            color: #475569;
-            font-size: 9px;
-        }
-
-        .attribution a {
-            color: #475569;
-            text-decoration: none;
-        }
-
-        .source-link {
-            color: #3b82f6;
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        .source-link:hover {
-            text-decoration: underline;
-        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg-color); color: var(--text-primary); margin: 0; padding: 12px; font-size: 13px; }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 12px; }
+        h2 { margin: 0; font-size: 15px; font-weight: 600; color: var(--text-primary); display: flex; align-items: center; gap: 6px; }
+        .feed-indicator { width: 8px; height: 8px; background-color: var(--active); border-radius: 50%; display: inline-block; box-shadow: 0 0 8px var(--active); }
+        .badge-ms { background-color: #0078d4; color: #ffffff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; }
+        .issue-container { display: flex; flex-direction: column; gap: 10px; }
+        .issue-card { background-color: var(--card-bg); border: 1px solid var(--border); border-radius: 6px; padding: 12px; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .platform-badge { background-color: rgba(59, 130, 246, 0.1); color: #60a5fa; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 600; }
+        .status-active { color: var(--active); font-size: 11px; font-weight: bold; }
+        .issue-title { font-weight: 700; font-size: 13px; color: #f1f5f9; margin-bottom: 4px; line-height: 1.3; }
+        .issue-details { font-size: 11px; color: var(--text-secondary); margin-bottom: 8px; }
+        .description { font-size: 11px; color: var(--text-secondary); line-height: 1.4; margin-bottom: 8px; }
+        .card-footer { margin-top: 4px; font-size: 11px; }
+        .source-link { color: #3b82f6; text-decoration: none; font-weight: 600; }
+        .attribution { color: #475569; font-size: 9px; }
     </style>
 </head>
 <body>
-
     <div class="header">
-        <h2><span class="feed-indicator"></span>Problematic Microsoft Updates</h2>
+        <h2><span class="feed-indicator"></span>Microsoft Security Issues</h2>
         <span class="badge-ms">MSRC RSS</span>
     </div>
-
-    <div class="issue-container">
-        ${cardHtml}
-    </div>
-
+    <div class="issue-container">${cardHtml}</div>
     <div style="margin-top: 15px; text-align: center;" class="attribution">
         Source: Official Microsoft Security Response Center Feed
     </div>
     <div style="margin-top: 20px; text-align: center; font-size: 8px; color: #475569;">
-    Last Updated: ${new Date().toLocaleString('en-US', { timeZone: 'America/New_York' })}
+        Last Updated (EST): ${new Date().toLocaleString('en-US', { timeZone: 'America/New_York' })}
     </div>
-</body>
 </body>
 </html>`;
 
