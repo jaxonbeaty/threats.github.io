@@ -2,9 +2,6 @@ const fs = require('fs');
 
 async function updateAllIssues() {
     try {
-        console.log('Fetching feeds...');
-        
-        // Fetch BOTH feeds
         const [msrcRes, statusRes] = await Promise.all([
             fetch('https://api.msrc.microsoft.com/update-guide/rss'),
             fetch('https://status.office.com/feed/rss')
@@ -31,58 +28,49 @@ async function updateAllIssues() {
         const securityItems = parseRSS(msrcXml);
         const operationalItems = parseRSS(statusXml);
 
-        let cardHtml = '';
-
-        // Add Operational Items (Service Health)
-        if (operationalItems.length > 0) {
-            operationalItems.forEach(item => {
-                cardHtml += `<div class="issue-card" style="border-left: 4px solid #f59e0b;"><div class="card-header"><span class="platform-badge" style="background:#f59e0b22; color:#f59e0b;">Operational</span></div><div class="issue-title">${escapeHtml(item.title)}</div><div class="description">${escapeHtml(item.desc.substring(0, 100))}...</div><div class="card-footer"><a class="source-link" href="${item.link}" target="_blank">View Status &rarr;</a></div></div>`;
-            });
-        } else {
-            cardHtml += `<div class="issue-card" style="border-left: 4px solid #10b981;"><div class="issue-title" style="color:#10b981;">All Microsoft Services Operational</div></div>`;
-        }
-
-        // Add Security Items (CVEs)
-        if (securityItems.length > 0) {
-            securityItems.forEach(item => {
-                cardHtml += `<div class="issue-card"><div class="card-header"><span class="platform-badge">Security</span></div><div class="issue-title">${escapeHtml(item.title)}</div><div class="card-footer"><a class="source-link" href="${item.link}" target="_blank">View Advisory &rarr;</a></div></div>`;
-            });
-        } else {
-            cardHtml += `<div class="issue-card" style="border-left: 4px solid #10b981;"><div class="issue-title" style="color:#10b981;">No Critical Security Advisories</div></div>`;
-        }
+        const generateCards = (items, type) => items.map(item => `
+            <div class="card">
+                <div class="card-title">${escapeHtml(item.title)}</div>
+                <div class="card-meta">${type === 'security' ? 'Security Advisory' : 'Service Status'}</div>
+                <a href="${item.link}" target="_blank" class="card-link">View Details &rarr;</a>
+            </div>`).join('');
 
         const fullHtml = `<!DOCTYPE html>
 <html>
 <head>
     <meta http-equiv="refresh" content="3600">
-    <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">
     <style>
-        body { font-family: sans-serif; background-color: #0f172a; color: #f8fafc; padding: 10px; font-size: 13px; }
-        .issue-card { background-color: #1e293b; border: 1px solid #334155; border-radius: 6px; padding: 10px; margin-bottom: 10px; }
-        .issue-title { font-weight: bold; margin-bottom: 5px; color: #f1f5f9; }
-        .platform-badge { font-size: 10px; padding: 2px 5px; border-radius: 3px; font-weight: bold; text-transform: uppercase; }
-        .source-link { color: #60a5fa; text-decoration: none; font-size: 11px; }
-        .description { font-size: 11px; color: #94a3b8; margin-bottom: 8px; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #0f172a; color: #f8fafc; margin: 0; padding: 15px; }
+        h2 { font-size: 16px; margin: 0 0 15px 0; border-left: 3px solid #0078d4; padding-left: 10px; }
+        .dashboard { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .column { display: flex; flex-direction: column; gap: 10px; }
+        .card { background: #1e293b; border: 1px solid #334155; padding: 12px; border-radius: 4px; }
+        .card-title { font-size: 13px; font-weight: 600; margin-bottom: 5px; color: #e2e8f0; }
+        .card-meta { font-size: 10px; color: #64748b; margin-bottom: 8px; text-transform: uppercase; }
+        .card-link { font-size: 11px; color: #38bdf8; text-decoration: none; font-weight: bold; }
     </style>
 </head>
 <body>
-    ${cardHtml}
-    <div style="text-align: center; font-size: 9px; color: #475569; margin-top: 10px;">
+    <h2>Microsoft Issues</h2>
+    <div class="dashboard">
+        <div class="column">
+            <div style="font-size: 12px; color: #94a3b8; margin-bottom: 5px;">Services</div>
+            ${operationalItems.length > 0 ? generateCards(operationalItems, 'service') : '<div class="card" style="border:none; color:#10b981;">All Systems Online</div>'}
+        </div>
+        <div class="column">
+            <div style="font-size: 12px; color: #94a3b8; margin-bottom: 5px;">Security</div>
+            ${securityItems.length > 0 ? generateCards(securityItems, 'security') : '<div class="card" style="border:none; color:#10b981;">No Faults Found</div>'}
+        </div>
+    </div>
+    <div style="text-align: center; font-size: 9px; color: #475569; margin-top: 20px;">
         Last Sync (EST): ${new Date().toLocaleString('en-US', { timeZone: 'America/New_York' })}
     </div>
 </body>
 </html>`;
 
         fs.writeFileSync('issues.html', fullHtml);
-        console.log('Successfully generated issues.html');
-    } catch (err) { 
-        console.error('Error generating dashboard:', err);
-        process.exit(1);
-    }
+    } catch (err) { console.error(err); }
 }
 
-function escapeHtml(str) { 
-    return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); 
-}
-
+function escapeHtml(str) { return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
 updateAllIssues();
