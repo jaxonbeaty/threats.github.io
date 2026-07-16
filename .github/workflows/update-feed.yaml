@@ -26,10 +26,10 @@ jobs:
       - name: Run Microsoft update
         run: node update-ms.js
 
-      - name: Commit and push changes
+      - name: Commit and Push
         run: |
-          git config --global user.name "GitHub Action"
-          git config --global user.email "action@github.com"
-          git add index.html issues.html
-          git diff-index --quiet HEAD || git commit -m "Automated hourly threat & MS update"
+          git config --global user.name 'github-actions'
+          git config --global user.email 'github-actions@users.noreply.github.com'
+          git add issues.html
+          git commit -m "Hourly Dashboard Update" || exit 0
           git push
