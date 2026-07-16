@@ -2,8 +2,9 @@ name: Update Threat Dashboard
 
 on:
   schedule:
-    - cron: '0 * * * *' # Runs hourly
-  workflow_dispatch: # Allows manual runs
+    # 0 = minute 0, 8-17 = hours 8 AM through 5 PM
+    - cron: '0 8-17 * * 1-5' 
+  workflow_dispatch:
 
 jobs:
   update-dashboard:
