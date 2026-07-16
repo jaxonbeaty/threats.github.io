@@ -97,7 +97,7 @@ async function updateAllIssues() {
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
-            border-bottom: 1px solid #1e293b; 
+            border-bottom: 1px solid #2a3f5f; 
             padding-bottom: 12px; 
             margin-bottom: 15px; 
         }
@@ -146,10 +146,9 @@ async function updateAllIssues() {
             gap: 10px;
         }
         
-        /* --- BORDER COLOR UPDATED HERE --- */
         .tile {
-            border: 1px solid #314158; /* Changed from #1e293b to match right widget */
-            background-color: rgba(15, 23, 42, 0.4);
+            border: 1px solid #2a3f5f; 
+            background-color: #0b1325; 
             border-radius: 4px;
             padding: 12px;
             text-align: center;
@@ -166,10 +165,9 @@ async function updateAllIssues() {
         .status-online { color: #10b981; }
         .status-issue { color: #f59e0b; }
 
-        /* --- BORDER COLOR UPDATED HERE --- */
         .cve-card {
-            border: 1px solid #314158; /* Changed from #1e293b to match right widget */
-            background-color: rgba(15, 23, 42, 0.4);
+            border: 1px solid #2a3f5f; 
+            background-color: #0b1325; 
             border-radius: 6px;
             padding: 14px;
             margin-bottom: 10px;
