@@ -33,7 +33,6 @@ async function updateAllIssues() {
         const operationalItems = parseRSS(statusXml);
 
         // --- SERVICE TILES LOGIC ---
-        // Combine all operational text to scan for affected services
         const combinedOpText = operationalItems.map(i => (i.title + " " + i.desc).toLowerCase()).join(" ");
         
         const coreServices = [
@@ -44,7 +43,6 @@ async function updateAllIssues() {
         ];
 
         let tilesHtml = coreServices.map(svc => {
-            // If the service keyword is mentioned in the active issues feed, flag it
             const hasIssue = svc.keywords.some(kw => combinedOpText.includes(kw));
             const statusText = hasIssue ? 'Degraded' : 'Online';
             const statusClass = hasIssue ? 'status-issue' : 'status-online';
@@ -60,7 +58,6 @@ async function updateAllIssues() {
         let secHtml = '';
         if (securityItems.length > 0) {
             secHtml = securityItems.map(item => {
-                // Format date to match YYYY-MM-DD
                 const dateObj = item.pubDate ? new Date(item.pubDate) : new Date();
                 const cleanDate = dateObj.toISOString().split('T')[0];
                 const cleanDesc = item.desc.replace(/<[^>]*>/g, '').replace(/&lt;.*?&gt;/g, '').substring(0, 180) + '...';
@@ -90,13 +87,12 @@ async function updateAllIssues() {
     <style>
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-            background-color: transparent; /* Allows Datto background to show through */
+            background-color: transparent; 
             color: #cbd5e1; 
             margin: 0; 
             padding: 10px; 
         }
         
-        /* Header styling matching "Global Threats" */
         .header-container { 
             display: flex; 
             justify-content: space-between; 
@@ -131,7 +127,6 @@ async function updateAllIssues() {
             text-decoration: none; 
         }
 
-        /* Layout */
         .main-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -145,14 +140,15 @@ async function updateAllIssues() {
             letter-spacing: 0.5px;
         }
 
-        /* Service Tiles */
         .tiles-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 10px;
         }
+        
+        /* --- BORDER COLOR UPDATED HERE --- */
         .tile {
-            border: 1px solid #1e293b;
+            border: 1px solid #314158; /* Changed from #1e293b to match right widget */
             background-color: rgba(15, 23, 42, 0.4);
             border-radius: 4px;
             padding: 12px;
@@ -170,14 +166,15 @@ async function updateAllIssues() {
         .status-online { color: #10b981; }
         .status-issue { color: #f59e0b; }
 
-        /* Security Cards */
+        /* --- BORDER COLOR UPDATED HERE --- */
         .cve-card {
-            border: 1px solid #1e293b;
+            border: 1px solid #314158; /* Changed from #1e293b to match right widget */
             background-color: rgba(15, 23, 42, 0.4);
             border-radius: 6px;
             padding: 14px;
             margin-bottom: 10px;
         }
+        
         .cve-header {
             display: flex;
             justify-content: space-between;
@@ -185,7 +182,7 @@ async function updateAllIssues() {
             align-items: flex-start;
         }
         .cve-title {
-            color: #38bdf8; /* Bright blue matching reference */
+            color: #38bdf8;
             font-weight: 600;
             font-size: 13px;
             text-decoration: none;
