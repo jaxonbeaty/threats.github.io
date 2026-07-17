@@ -1,7 +1,6 @@
 const fs = require('fs');
 
 // --- FEED URLS ---
-// Replace the M365 and Power Platform URLs with your specific feed endpoints
 const M365_RSS_URL = 'https://status.cloud.microsoft/api/feed/mac'; 
 const POWER_PLATFORM_RSS_URL = 'https://status.cloud.microsoft/api/feed/ppac';
 const AZURE_RSS_URL = 'https://rssfeed.azure.status.microsoft/en-us/status/feed/';
@@ -12,7 +11,6 @@ async function updateAllIssues() {
     try {
         console.log('Fetching all feeds...');
         
-        // Fetch all endpoints concurrently
         const [msrcRes, m365Res, azureRes, ppRes, consumerRes] = await Promise.all([
             fetch(MSRC_RSS_URL),
             fetch(M365_RSS_URL),
@@ -27,7 +25,6 @@ async function updateAllIssues() {
         const ppXml = await ppRes.text();
         const consumerHtml = await consumerRes.text();
 
-        // --- SECURITY FEED PARSER ---
         const parseSecurityRSS = (xml) => {
             const items = [];
             const itemRegex = /<item>([\s\S]*?)<\/item>/g;
@@ -46,29 +43,19 @@ async function updateAllIssues() {
 
         const securityItems = parseSecurityRSS(msrcXml);
 
-        // --- SERVICE STATUS PARSERS ---
-        // Helper to check for <status>Available</status> in the XML
         const checkStatusTag = (xml) => {
             const match = xml.match(/<status>([^<]+)<\/status>/i);
             if (match && match[1].trim().toLowerCase() === 'available') {
-                return true; // Online
+                return true;
             }
-            return false; // Degraded
+            return false;
         };
 
-        // M365 (Checks for <status>Available</status>)
         const m365Online = checkStatusTag(m365Xml);
-
-        // Power Platform (Checks for <status>Available</status>)
         const ppOnline = checkStatusTag(ppXml);
-
-        // Azure (Feed is empty of <item> tags when healthy)
         const azureOnline = !(/<item>/i.test(azureXml));
+        const consumerOnline = consumerHtml.includes('Operational') || consumerHtml.includes('up and running');
 
-        // Consumer (Scrapes page for the standard healthy text string)
-        const consumerOnline = consumerHtml.includes('Everything is up and running') || consumerHtml.includes('All services are running');
-
-        // Build the Tile Array
         const coreServices = [
             { name: 'M365 Enterprise', isOnline: m365Online },
             { name: 'Azure', isOnline: azureOnline },
@@ -87,7 +74,6 @@ async function updateAllIssues() {
             </div>`;
         }).join('');
 
-        // --- SECURITY CARDS HTML ---
         let secHtml = '';
         if (securityItems.length > 0) {
             secHtml = securityItems.map(item => {
@@ -111,153 +97,53 @@ async function updateAllIssues() {
             </div>`;
         }
 
-        // --- HTML TEMPLATE ---
         const fullHtml = `<!DOCTYPE html>
 <html>
 <head>
     <meta http-equiv="refresh" content="3600">
     <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">
     <style>
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-            background-color: transparent; 
-            color: #cbd5e1; 
-            margin: 0; 
-            padding: 10px; 
-        }
-        
-        .header-container { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            border-bottom: 1px solid #2a3f5f; 
-            padding-bottom: 12px; 
-            margin-bottom: 15px; 
-        }
-        .header-title { 
-            display: flex; 
-            align-items: center; 
-            font-size: 15px; 
-            font-weight: 600; 
-            color: #f8fafc; 
-        }
-        .dot { 
-            height: 8px; 
-            width: 8px; 
-            background-color: #10b981; 
-            border-radius: 50%; 
-            display: inline-block; 
-            margin-right: 8px; 
-            box-shadow: 0 0 5px #10b981; 
-        }
-        .feed-btn { 
-            background-color: #0052cc; 
-            color: white; 
-            padding: 4px 10px; 
-            border-radius: 4px; 
-            font-size: 11px; 
-            font-weight: 600; 
-            text-decoration: none; 
-        }
-
-        .main-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-        .section-title {
-            font-size: 12px;
-            color: #94a3b8;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .tiles-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-        
-        .tile {
-            border: 1px solid #2a3f5f; 
-            background-color: #0b1325; 
-            border-radius: 4px;
-            padding: 12px;
-            text-align: center;
-        }
-        .tile-name {
-            font-size: 12px;
-            color: #f8fafc;
-            margin-bottom: 6px;
-        }
-        .tile-status {
-            font-size: 11px;
-            font-weight: 700;
-        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: transparent; color: #cbd5e1; margin: 0; padding: 10px; }
+        .header-container { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2a3f5f; padding-bottom: 12px; margin-bottom: 15px; }
+        .header-title { display: flex; align-items: center; font-size: 15px; font-weight: 600; color: #f8fafc; }
+        .dot { height: 8px; width: 8px; background-color: #10b981; border-radius: 50%; display: inline-block; margin-right: 8px; box-shadow: 0 0 5px #10b981; }
+        .feed-btn { background-color: #0052cc; color: white; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; text-decoration: none; }
+        .main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .section-title { font-size: 12px; color: #94a3b8; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .tiles-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .tile { border: 1px solid #2a3f5f; background-color: #0b1325; border-radius: 4px; padding: 12px; text-align: center; }
+        .tile-name { font-size: 12px; color: #f8fafc; margin-bottom: 6px; }
+        .tile-status { font-size: 11px; font-weight: 700; }
         .status-online { color: #10b981; }
         .status-issue { color: #f59e0b; }
-
-        .cve-card {
-            border: 1px solid #2a3f5f; 
-            background-color: #0b1325; 
-            border-radius: 6px;
-            padding: 14px;
-            margin-bottom: 10px;
-        }
-        
-        .cve-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 6px;
-            align-items: flex-start;
-        }
-        .cve-title {
-            color: #38bdf8;
-            font-weight: 600;
-            font-size: 13px;
-            text-decoration: none;
-            max-width: 75%;
-        }
+        .cve-card { border: 1px solid #2a3f5f; background-color: #0b1325; border-radius: 6px; padding: 14px; margin-bottom: 10px; }
+        .cve-header { display: flex; justify-content: space-between; margin-bottom: 6px; align-items: flex-start; }
+        .cve-title { color: #38bdf8; font-weight: 600; font-size: 13px; text-decoration: none; max-width: 75%; }
         .cve-title:hover { text-decoration: underline; }
-        .cve-date {
-            color: #94a3b8;
-            font-size: 11px;
-        }
-        .cve-desc {
-            font-size: 11px;
-            line-height: 1.5;
-            color: #cbd5e1;
-        }
+        .cve-date { color: #94a3b8; font-size: 11px; }
+        .cve-desc { font-size: 11px; line-height: 1.5; color: #cbd5e1; }
     </style>
 </head>
 <body>
-
     <div class="header-container">
         <div class="header-title"><span class="dot"></span> Active Microsoft Issues</div>
         <a href="https://status.cloud.microsoft/" target="_blank" class="feed-btn">Admin Center</a>
     </div>
-
     <div class="main-grid">
-        <!-- Left Column: Services -->
         <div>
             <div class="section-title">Core Services</div>
             <div class="tiles-grid">
                 ${tilesHtml}
             </div>
         </div>
-
-        <!-- Right Column: Security -->
         <div>
             <div class="section-title">Latest Security Advisories</div>
             ${secHtml}
         </div>
     </div>
-
     <div style="text-align: right; font-size: 9px; color: #475569; margin-top: 15px;">
         Last Sync (EDT): ${new Date().toLocaleString('en-US', { timeZone: 'America/New_York' })}
     </div>
-
 </body>
 </html>`;
 
