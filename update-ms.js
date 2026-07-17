@@ -2,9 +2,9 @@ const fs = require('fs');
 
 // --- FEED URLS ---
 // Replace the M365 and Power Platform URLs with your specific feed endpoints
-const M365_RSS_URL = 'YOUR_M365_RSS_URL_HERE'; 
-const POWER_PLATFORM_RSS_URL = 'YOUR_POWER_PLATFORM_RSS_URL_HERE';
-const AZURE_RSS_URL = 'https://azurestatusprodaus.azurewebsites.net/en-us/status/feed/';
+const M365_RSS_URL = 'https://status.cloud.microsoft/api/feed/mac'; 
+const POWER_PLATFORM_RSS_URL = 'https://status.cloud.microsoft/api/feed/ppac';
+const AZURE_RSS_URL = 'https://rssfeed.azure.status.microsoft/en-us/status/feed/';
 const CONSUMER_STATUS_URL = 'https://portal.office.com/servicestatus';
 const MSRC_RSS_URL = 'https://api.msrc.microsoft.com/update-guide/rss';
 
