@@ -1,17 +1,3 @@
-If both scripts are running in the exact same YAML workflow but only one is updating in your dashboard, the issue usually comes down to one of two things:
-
-1. **The Commit Step:** Your YAML file might be explicitly targeting the Microsoft file. If your commit step says `git add issues.html`, the workflow completely ignores any changes made to your global threats HTML file. Change that line to `git add .` or `git add issues.html global.html` so both files are committed to the repository.
-2. **The Cache Buster:** If the repository shows that both files are successfully updating, but Datto RMM only shows the new Microsoft data, the global threats iframe is being cached by Datto. You will need to create a `global-loader.html` with the same `?v=Timestamp` redirect trick we used for the Microsoft widget to force Datto to pull the fresh global file.
-
-Moving to direct, service-specific RSS feeds is definitely the right call for enterprise environments. It eliminates the guesswork of keyword scanning and relies directly on Microsoft's explicit status tags.
-
-Here is the fully rewritten script. It now parses the specific XML structures you provided for M365, Azure, and Power Platform by looking for the `<status>Available</status>` tags or the presence of `<item>` blocks. For the Consumer status, it scrapes the public Service Status portal and searches for the standard "up and running" confirmation text.
-
-### The Complete `update-ms.js` Script
-
-*Note: You will need to drop in your specific RSS feed URLs for M365 and Power Platform at the very top of this script, as the XML snippets provided didn't contain the direct `.xml` or `/rss` source URLs.*
-
-```javascript
 const fs = require('fs');
 
 // --- FEED URLS ---
