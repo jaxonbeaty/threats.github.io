@@ -275,5 +275,3 @@ function escapeHtml(str) {
 }
 
 updateAllIssues();
-
-```
