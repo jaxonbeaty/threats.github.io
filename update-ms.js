@@ -54,7 +54,7 @@ async function updateAllIssues() {
         const m365Online = checkStatusTag(m365Xml);
         const ppOnline = checkStatusTag(ppXml);
         const azureOnline = !(/<item>/i.test(azureXml));
-        const consumerOnline = consumerHtml.includes('Operational') || consumerHtml.includes('up and running');
+        const consumerOnline = /aria-label="Status is Operational"/i.test(consumerHtml);
 
         const coreServices = [
             { name: 'M365 Enterprise', isOnline: m365Online },
