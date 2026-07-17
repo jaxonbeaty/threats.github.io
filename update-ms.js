@@ -1,19 +1,48 @@
+If both scripts are running in the exact same YAML workflow but only one is updating in your dashboard, the issue usually comes down to one of two things:
+
+1. **The Commit Step:** Your YAML file might be explicitly targeting the Microsoft file. If your commit step says `git add issues.html`, the workflow completely ignores any changes made to your global threats HTML file. Change that line to `git add .` or `git add issues.html global.html` so both files are committed to the repository.
+2. **The Cache Buster:** If the repository shows that both files are successfully updating, but Datto RMM only shows the new Microsoft data, the global threats iframe is being cached by Datto. You will need to create a `global-loader.html` with the same `?v=Timestamp` redirect trick we used for the Microsoft widget to force Datto to pull the fresh global file.
+
+Moving to direct, service-specific RSS feeds is definitely the right call for enterprise environments. It eliminates the guesswork of keyword scanning and relies directly on Microsoft's explicit status tags.
+
+Here is the fully rewritten script. It now parses the specific XML structures you provided for M365, Azure, and Power Platform by looking for the `<status>Available</status>` tags or the presence of `<item>` blocks. For the Consumer status, it scrapes the public Service Status portal and searches for the standard "up and running" confirmation text.
+
+### The Complete `update-ms.js` Script
+
+*Note: You will need to drop in your specific RSS feed URLs for M365 and Power Platform at the very top of this script, as the XML snippets provided didn't contain the direct `.xml` or `/rss` source URLs.*
+
+```javascript
 const fs = require('fs');
+
+// --- FEED URLS ---
+// Replace the M365 and Power Platform URLs with your specific feed endpoints
+const M365_RSS_URL = 'YOUR_M365_RSS_URL_HERE'; 
+const POWER_PLATFORM_RSS_URL = 'YOUR_POWER_PLATFORM_RSS_URL_HERE';
+const AZURE_RSS_URL = 'https://azurestatusprodaus.azurewebsites.net/en-us/status/feed/';
+const CONSUMER_STATUS_URL = 'https://portal.office.com/servicestatus';
+const MSRC_RSS_URL = 'https://api.msrc.microsoft.com/update-guide/rss';
 
 async function updateAllIssues() {
     try {
-        console.log('Fetching feeds...');
+        console.log('Fetching all feeds...');
         
-        // Fetch BOTH feeds
-        const [msrcRes, statusRes] = await Promise.all([
-            fetch('https://api.msrc.microsoft.com/update-guide/rss'),
-            fetch('https://status.office.com/feed/rss')
+        // Fetch all endpoints concurrently
+        const [msrcRes, m365Res, azureRes, ppRes, consumerRes] = await Promise.all([
+            fetch(MSRC_RSS_URL),
+            fetch(M365_RSS_URL),
+            fetch(AZURE_RSS_URL),
+            fetch(POWER_PLATFORM_RSS_URL),
+            fetch(CONSUMER_STATUS_URL)
         ]);
 
         const msrcXml = await msrcRes.text();
-        const statusXml = await statusRes.text();
+        const m365Xml = await m365Res.text();
+        const azureXml = await azureRes.text();
+        const ppXml = await ppRes.text();
+        const consumerHtml = await consumerRes.text();
 
-        const parseRSS = (xml) => {
+        // --- SECURITY FEED PARSER ---
+        const parseSecurityRSS = (xml) => {
             const items = [];
             const itemRegex = /<item>([\s\S]*?)<\/item>/g;
             let match;
@@ -29,23 +58,41 @@ async function updateAllIssues() {
             return items;
         };
 
-        const securityItems = parseRSS(msrcXml);
-        const operationalItems = parseRSS(statusXml);
+        const securityItems = parseSecurityRSS(msrcXml);
 
-        // --- SERVICE TILES LOGIC ---
-        const combinedOpText = operationalItems.map(i => (i.title + " " + i.desc).toLowerCase()).join(" ");
-        
+        // --- SERVICE STATUS PARSERS ---
+        // Helper to check for <status>Available</status> in the XML
+        const checkStatusTag = (xml) => {
+            const match = xml.match(/<status>([^<]+)<\/status>/i);
+            if (match && match[1].trim().toLowerCase() === 'available') {
+                return true; // Online
+            }
+            return false; // Degraded
+        };
+
+        // M365 (Checks for <status>Available</status>)
+        const m365Online = checkStatusTag(m365Xml);
+
+        // Power Platform (Checks for <status>Available</status>)
+        const ppOnline = checkStatusTag(ppXml);
+
+        // Azure (Feed is empty of <item> tags when healthy)
+        const azureOnline = !(/<item>/i.test(azureXml));
+
+        // Consumer (Scrapes page for the standard healthy text string)
+        const consumerOnline = consumerHtml.includes('Everything is up and running') || consumerHtml.includes('All services are running');
+
+        // Build the Tile Array
         const coreServices = [
-            { name: 'Microsoft 365', keywords: ['microsoft 365', 'm365', 'office', 'portal', 'suite'] },
-            { name: 'MS Teams', keywords: ['teams'] },
-            { name: 'Exchange Online', keywords: ['exchange', 'email', 'outlook'] },
-            { name: 'SharePoint', keywords: ['sharepoint', 'onedrive'] }
+            { name: 'M365 Enterprise', isOnline: m365Online },
+            { name: 'Azure', isOnline: azureOnline },
+            { name: 'Power Platform', isOnline: ppOnline },
+            { name: 'Microsoft Consumer', isOnline: consumerOnline }
         ];
 
         let tilesHtml = coreServices.map(svc => {
-            const hasIssue = svc.keywords.some(kw => combinedOpText.includes(kw));
-            const statusText = hasIssue ? 'Degraded' : 'Online';
-            const statusClass = hasIssue ? 'status-issue' : 'status-online';
+            const statusText = svc.isOnline ? 'Online' : 'Degraded';
+            const statusClass = svc.isOnline ? 'status-online' : 'status-issue';
             
             return `
             <div class="tile">
@@ -54,7 +101,7 @@ async function updateAllIssues() {
             </div>`;
         }).join('');
 
-        // --- SECURITY CARDS LOGIC ---
+        // --- SECURITY CARDS HTML ---
         let secHtml = '';
         if (securityItems.length > 0) {
             secHtml = securityItems.map(item => {
@@ -202,10 +249,11 @@ async function updateAllIssues() {
 
     <div class="header-container">
         <div class="header-title"><span class="dot"></span> Active Microsoft Issues</div>
-        <a href="https://status.office.com/" target="_blank" class="feed-btn">MS Status Feed</a>
+        <a href="https://status.cloud.microsoft/" target="_blank" class="feed-btn">Admin Center</a>
     </div>
 
     <div class="main-grid">
+        <!-- Left Column: Services -->
         <div>
             <div class="section-title">Core Services</div>
             <div class="tiles-grid">
@@ -213,6 +261,7 @@ async function updateAllIssues() {
             </div>
         </div>
 
+        <!-- Right Column: Security -->
         <div>
             <div class="section-title">Latest Security Advisories</div>
             ${secHtml}
@@ -220,7 +269,7 @@ async function updateAllIssues() {
     </div>
 
     <div style="text-align: right; font-size: 9px; color: #475569; margin-top: 15px;">
-        Last Sync (EST): ${new Date().toLocaleString('en-US', { timeZone: 'America/New_York' })}
+        Last Sync (EDT): ${new Date().toLocaleString('en-US', { timeZone: 'America/New_York' })}
     </div>
 
 </body>
@@ -240,3 +289,5 @@ function escapeHtml(str) {
 }
 
 updateAllIssues();
+
+```
