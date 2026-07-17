@@ -18,7 +18,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20' # <-- Fixed this line!
+          node-version: '20'
 
       - name: Run CISA update
         run: node update.js
@@ -30,6 +30,6 @@ jobs:
         run: |
           git config --global user.name 'github-actions'
           git config --global user.email 'github-actions@users.noreply.github.com'
-          git add issues.html
+          git add .
           git commit -m "Hourly Dashboard Update" || exit 0
           git push
