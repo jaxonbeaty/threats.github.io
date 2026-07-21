@@ -147,6 +147,62 @@
         
         <div class="threat-card">
             <div class="card-header">
+                <a class="cve-link" href="https://nvd.nist.gov/vuln/detail/CVE-2026-60137" target="_blank">
+                    CVE-2026-60137
+                </a>
+                <span class="date-badge">Added 2026-07-21</span>
+            </div>
+            <div class="product-info">
+                <strong>WordPress</strong> &bull; Core
+            </div>
+            <div class="vuln-name">WordPress Core SQL Injection Vulnerability</div>
+            <div class="description">WordPress Core contains a SQL injection vulnerability when a plugin or theme passes untrusted input to the parameter. This vulnerability can be chained with CVE-2026-63030 to allow an unauthenticated attacker to gain remote code execution on default WordPress installations.</div>
+            
+        </div>
+        <div class="threat-card">
+            <div class="card-header">
+                <a class="cve-link" href="https://nvd.nist.gov/vuln/detail/CVE-2026-63030" target="_blank">
+                    CVE-2026-63030
+                </a>
+                <span class="date-badge">Added 2026-07-21</span>
+            </div>
+            <div class="product-info">
+                <strong>WordPress</strong> &bull; Core
+            </div>
+            <div class="vuln-name">WordPress Core Interpretation Conflict Vulnerability</div>
+            <div class="description">WordPress Core contains an interpretation conflict vulnerability that could allow an attacker to perform SQL Injection and achieve Remote Code Execution. This vulnerability can be chained with CVE-2026-60137.</div>
+            
+        </div>
+        <div class="threat-card">
+            <div class="card-header">
+                <a class="cve-link" href="https://nvd.nist.gov/vuln/detail/CVE-2026-0770" target="_blank">
+                    CVE-2026-0770
+                </a>
+                <span class="date-badge">Added 2026-07-21</span>
+            </div>
+            <div class="product-info">
+                <strong>Langflow</strong> &bull; Langflow
+            </div>
+            <div class="vuln-name">Langflow Inclusion of Functionality from Untrusted Control Sphere Vulnerability</div>
+            <div class="description">Langflow contains an inclusion of functionality from untrusted control sphere vulnerability that allows remote attackers to execute arbitrary code on affected installations. </div>
+            
+        </div>
+        <div class="threat-card">
+            <div class="card-header">
+                <a class="cve-link" href="https://nvd.nist.gov/vuln/detail/CVE-2021-27137" target="_blank">
+                    CVE-2021-27137
+                </a>
+                <span class="date-badge">Added 2026-07-21</span>
+            </div>
+            <div class="product-info">
+                <strong>DD-WRT</strong> &bull; DD-WRT
+            </div>
+            <div class="vuln-name">DD-WRT Stack-Based Buffer Overflow Vulnerability</div>
+            <div class="description">DD-WRT contains a stack-based buffer overflow vulnerability that could allow an unauthenticated attacker to overflow an internal buffer used by UPnP and trigger a code execution vulnerability.</div>
+            
+        </div>
+        <div class="threat-card">
+            <div class="card-header">
                 <a class="cve-link" href="https://nvd.nist.gov/vuln/detail/CVE-2026-58644" target="_blank">
                     CVE-2026-58644
                 </a>
@@ -229,65 +285,9 @@
             <div class="description">Microsoft Active Directory Federation Services contains an insufficient granularity of access control vulnerability that allows an authorized attacker to elevate privileges locally.</div>
             
         </div>
-        <div class="threat-card">
-            <div class="card-header">
-                <a class="cve-link" href="https://nvd.nist.gov/vuln/detail/CVE-2026-56164" target="_blank">
-                    CVE-2026-56164
-                </a>
-                <span class="date-badge">Added 2026-07-14</span>
-            </div>
-            <div class="product-info">
-                <strong>Microsoft</strong> &bull; SharePoint Server
-            </div>
-            <div class="vuln-name">Microsoft SharePoint Server Missing Authentication for Critical Function Vulnerability</div>
-            <div class="description">Microsoft SharePoint contains a missing authentication for critical function vulnerability that allows an unauthorized attacker to elevate privileges over a network.</div>
-            
-        </div>
-        <div class="threat-card">
-            <div class="card-header">
-                <a class="cve-link" href="https://nvd.nist.gov/vuln/detail/CVE-2026-15409" target="_blank">
-                    CVE-2026-15409
-                </a>
-                <span class="date-badge">Added 2026-07-14</span>
-            </div>
-            <div class="product-info">
-                <strong>SonicWall</strong> &bull; SMA1000 Appliances
-            </div>
-            <div class="vuln-name">SonicWall SMA1000 Appliances Server-Side Request Forgery Vulnerability</div>
-            <div class="description">SonicWall SMA1000 Appliances contain a server-side request forgery vulnerability that could allow a remote unauthenticated attacker to potentially cause the appliance to make requests to unintended location.</div>
-            
-        </div>
-        <div class="threat-card">
-            <div class="card-header">
-                <a class="cve-link" href="https://nvd.nist.gov/vuln/detail/CVE-2026-15410" target="_blank">
-                    CVE-2026-15410
-                </a>
-                <span class="date-badge">Added 2026-07-14</span>
-            </div>
-            <div class="product-info">
-                <strong>SonicWall</strong> &bull; SMA1000 Appliances
-            </div>
-            <div class="vuln-name">SonicWall SMA1000 Appliances Code Injection Vulnerability</div>
-            <div class="description">SonicWall SMA1000 Appliances contain a code injection vulnerability which in specific conditions could potentially enable a remote authenticated attacker as administrator to execute arbitrary OS commands.</div>
-            
-        </div>
-        <div class="threat-card">
-            <div class="card-header">
-                <a class="cve-link" href="https://nvd.nist.gov/vuln/detail/CVE-2008-4128" target="_blank">
-                    CVE-2008-4128
-                </a>
-                <span class="date-badge">Added 2026-07-13</span>
-            </div>
-            <div class="product-info">
-                <strong>Cisco</strong> &bull; IOS
-            </div>
-            <div class="vuln-name">Cisco IOS Cross-Site Request Forgery Vulnerability</div>
-            <div class="description">Cisco IOS 12.4 contains multiple cross-site forgery vulnerabilities that allows remote attackers to execute arbitrary commands via (1) a certain &quot;show privilege&quot; command to the /level/15/exec/- URI, and (2) a certain &quot;alias exec&quot; command to the /level/15/exec/-/configure/http URI.</div>
-            
-        </div>
     </div>
     <div style="margin-top: 20px; text-align: center; font-size: 8px; color: #475569;">
-        Last Updated: 7/21/2026, 9:04:54 AM
+        Last Updated: 7/21/2026, 2:51:24 PM
     </div>
 </body>
 </html>
