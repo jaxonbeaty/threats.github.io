@@ -175,6 +175,20 @@
         </div>
         <div class="threat-card">
             <div class="card-header">
+                <a class="cve-link" href="https://nvd.nist.gov/vuln/detail/CVE-2025-39682" target="_blank">
+                    CVE-2025-39682
+                </a>
+                <span class="date-badge">Added 2026-09-18</span>
+            </div>
+            <div class="product-info">
+                <strong>Linux</strong> &bull; Kernel
+            </div>
+            <div class="vuln-name">Linux Kernel Improper Check for Unusual or Exceptional Conditions Vulnerability</div>
+            <div class="description">Linux Kernel contains an improper check for unusual or exceptional conditions vulnerability in the TLS receive path which allows a zero-length record retrieved from the rx_list to bypass the intended recvmsg() record-type handling, potentially causing subsequent TLS records to be processed using incorrect zero-copy and queuing assumptions. The impacted product(s) could be end-of-life (EoL) and/or end-of-service (EoS). Users are advised to discontinue use and/or transition to a supported version.</div>
+            
+        </div>
+        <div class="threat-card">
+            <div class="card-header">
                 <a class="cve-link" href="https://nvd.nist.gov/vuln/detail/CVE-2026-58704" target="_blank">
                     CVE-2026-58704
                 </a>
@@ -271,23 +285,9 @@
             <div class="description">JFrog Artifactory contains an improper authentication vulnerability that could return an internal anonymous-user token to an unauthenticated caller when anonymous access is disabled, potentially exposing sensitive resources.</div>
             
         </div>
-        <div class="threat-card">
-            <div class="card-header">
-                <a class="cve-link" href="https://nvd.nist.gov/vuln/detail/CVE-2026-85706" target="_blank">
-                    CVE-2026-85706
-                </a>
-                <span class="date-badge">Added 2026-09-11</span>
-            </div>
-            <div class="product-info">
-                <strong>GitLab</strong> &bull; Community Edition and Enterprise Edition
-            </div>
-            <div class="vuln-name">GitLab Community Edition and Enterprise Edition Path Traversal Vulnerability</div>
-            <div class="description">GitLab Community Edition and Enterprise Edition contains a path traversal vulnerability that allows an unauthenticated user to read arbitrary files due to an improper path confinement and missing authentication enforcement in the repository commits API.</div>
-            
-        </div>
     </div>
     <div style="margin-top: 20px; text-align: center; font-size: 8px; color: #475569;">
-        Last Updated: 9/18/2026, 12:57:36 PM
+        Last Updated: 9/18/2026, 3:29:35 PM
     </div>
 </body>
 </html>
