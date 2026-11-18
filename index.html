@@ -147,6 +147,20 @@
         
         <div class="threat-card">
             <div class="card-header">
+                <a class="cve-link" href="https://nvd.nist.gov/vuln/detail/CVE-2026-115731" target="_blank">
+                    CVE-2026-115731
+                </a>
+                <span class="date-badge">Added 2026-11-17</span>
+            </div>
+            <div class="product-info">
+                <strong>Perforce</strong> &bull; Puppet Enterprise
+            </div>
+            <div class="vuln-name">Perforce Puppet Enterprise Deserialization of Untrusted Data Vulnerability</div>
+            <div class="description">Perforce Puppet Enterprise contains a deserialization of untrusted data vulnerability in Puppet’s report-processing code that allows a client with any CA-signed agent certificate to execute arbitrary code on the Puppet Server as the service user by submitting a report containing a crafted rich-data type through a PUT request. If the certificate authority automatically signs requests without strong verification, an unauthenticated network attacker can obtain a valid certificate and exploit the vulnerability.</div>
+            
+        </div>
+        <div class="threat-card">
+            <div class="card-header">
                 <a class="cve-link" href="https://nvd.nist.gov/vuln/detail/CVE-2026-114713" target="_blank">
                     CVE-2026-114713
                 </a>
@@ -271,23 +285,9 @@
             <div class="description">GPUStack contains an improper authentication vulnerability which could allow unauthenticated administrative access, including user and model changes, persistent administrator API-key creation, disclosure of worker and cloud-provider secrets, and code execution through POST /v2/inference-backends/from-yaml.</div>
             
         </div>
-        <div class="threat-card">
-            <div class="card-header">
-                <a class="cve-link" href="https://nvd.nist.gov/vuln/detail/CVE-2026-123158" target="_blank">
-                    CVE-2026-123158
-                </a>
-                <span class="date-badge">Added 2026-11-09</span>
-            </div>
-            <div class="product-info">
-                <strong>OpenBSD</strong> &bull; OpenSSH
-            </div>
-            <div class="vuln-name">OpenBSD OpenSSH Unexpected Status Code or Return Value Vulnerability</div>
-            <div class="description">OpenBSD OpenSSH on Linux contains an unexpected status code or return value vulnerability that could allow for authentication bypass.</div>
-            
-        </div>
     </div>
     <div style="margin-top: 20px; text-align: center; font-size: 8px; color: #475569;">
-        Last Updated: 11/17/2026, 12:24:40 PM
+        Last Updated: 11/18/2026, 11:58:06 AM
     </div>
 </body>
 </html>
